@@ -33,7 +33,7 @@ setup(
     include_package_data=True,
     ext_modules=cythonize(
         ['pconsc4/parsing/_load_data.pyx', 'pconsc4/parsing/_mi_info.pyx']),
-    requires=['numpy', 'Cython', 'scipy', 'keras', 'gaussdca'],
+    requires=['numpy', 'Cython', 'scipy', 'keras', 'gaussdca', 'h5py'],
     classifiers=[
         'Programming Language :: Python',
         'Topic :: Scientific/Engineering :: Bio-Informatics',
