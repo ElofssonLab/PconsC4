@@ -4,7 +4,7 @@ from Cython.Build import cythonize
 
 setup(name='pconsc4', version='0.1',
       description='',
-      url='',
+      url='https://github.com/ElofssonLab/PconsC4',
       author='Mirco Michel and David Menéndez Hurtado',
       author_email='davidmenhur@gmail.com',
       license='GPLv3',
