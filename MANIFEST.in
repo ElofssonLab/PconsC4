@@ -1,0 +1,3 @@
+include pconsc4/models/ss_pred_resnet_elu_nolr_dropout01_l26_large_v3_saved_model.h5
+include pconsc4/models/pconsc4_unet_weights.h5
+
