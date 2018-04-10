@@ -1,7 +1,7 @@
 # PconsC4:
 fast, accurate, and hassle-free contact prediction.
 
-##Installation instructions:
+## Installation instructions:
 
     pip3 install numpy Cython &&
     pip3 install -U git+https://github.com/serge-sans-paille/pythran@master &&
