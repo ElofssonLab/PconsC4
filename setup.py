@@ -53,6 +53,7 @@ setup(
     author_email='davidmenhur@gmail.com',
     license='GPLv3',
     packages=find_packages(),
+    include_dirs=[np.get_include()],
     package_data={
         'pconsc4.models': [
             'pconsc4/models/pconsc4_unet_weights.h5',
@@ -60,9 +61,9 @@ setup(
         ]
     },
     include_package_data=True,
-    ext_modules=cythonize(
-        ['pconsc4/parsing/_load_data.pyx', 'pconsc4/parsing/_mi_info.pyx']),
-    requires=['numpy', 'Cython', 'scipy', 'keras', 'gaussdca', 'h5py'],
+    ext_modules=cythonize(extensions),
+    install_requires=open('requirements.txt').read().splitlines(),
+    setup_requires=['numpy', 'Cython'],
     classifiers=[
         'Programming Language :: Python',
         'Topic :: Scientific/Engineering :: Bio-Informatics',

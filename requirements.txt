@@ -1,0 +1,6 @@
+numpy
+Cython
+scipy
+keras
+pyGaussDCA
+h5py
