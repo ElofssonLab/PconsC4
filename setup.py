@@ -3,6 +3,7 @@ import os
 from setuptools import setup, Extension, find_packages
 
 from Cython.Build import cythonize
+import numpy as np
 
 # Check wheter we have pyx or c files:
 base_path = os.path.dirname(os.path.abspath(__file__))
@@ -20,10 +21,12 @@ if use_cython:
     extensions = [
         Extension(
             'pconsc4.parsing._load_data', ['pconsc4/parsing/_load_data.pyx'],
+            include_dirs=[np.get_include()],
             extra_compile_args=flags,
             extra_link_args=flags),
         Extension(
             'pconsc4.parsing._mi_info', ['pconsc4/parsing/_mi_info.pyx'],
+            include_dirs=[np.get_include()],
             extra_compile_args=flags,
             extra_link_args=flags)
     ]
@@ -31,10 +34,12 @@ else:
     extensions = [
         Extension(
             'pconsc4.parsing._load_data', ['pconsc4/parsing/_load_data.c'],
+            include_dirs=[np.get_include()],
             extra_compile_args=flags,
             extra_link_args=flags),
         Extension(
             'pconsc4.parsing._mi_info', ['pconsc4/parsing/_mi_info.c'],
+            include_dirs=[np.get_include()],
             extra_compile_args=flags,
             extra_link_args=flags)
     ]
