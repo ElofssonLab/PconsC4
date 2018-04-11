@@ -63,17 +63,17 @@ def _generate_features(fname):
     return feat_dict, L
 
 
+def _symmetrize(matrix, L):
+    matrix = np.squeeze(matrix[:, :L, :L, :])  # Remove padding
+    matrix = (matrix + matrix.T) / 2.  # Symmetrize
+    np.fill_diagonal(matrix, 0)
+    return matrix
+
+
 def _predict(model, feat_dict, L):
-    result_lst = model.predict_on_batch(feat_dict)
-    cmap = result_lst[2][:, :L, :L, :]  # remove padding
-    cmap = cmap.reshape((L, L))
-    cmap = (cmap + cmap.T) / 2.  # make it symmetric by averaging over triangles
-    sscoremap = result_lst[2][:, :L, :L, :]
-    sscoremap = sscoremap.reshape((L, L))
-    sscoremap = (sscoremap + sscoremap.T) / 2.
+    result_lst = [_symmetrize(x, L) for x in model.predict_on_batch(feat_dict)]
 
-    return dict(cmap=cmap, s_score=sscoremap)
-
+    return dict(cmap=result_lst[2], s_score=result_lst[0], cmap_6=result_lst[1], cmap_10=result_lst[3])
 
 
 def predict(model, alignment):
