@@ -24,19 +24,24 @@ def _pad(x, depth=4):
         return np.pad(x, [(0, divisor - remainder), (0, divisor - remainder), (0, 0)], "constant")
 
 
-def _generate_features(fname):
+def _generate_features(fname, verbose=0):
     feat_lst = ['gdca', 'cross_h', 'nmi_corr', 'mi_corr', 'seq', 'part_entr', 'self_info']
 
     if not os.path.isfile(fname):
         raise IOError("Alignment file does not exist.")
 
-    # self_info, part_entr, seq = process_a3m(unicode(fname, encoding="utf-8"))
+    if verbose > 1:
+        print('Extracting column statistics')
     self_info, part_entr, seq = process_a3m(fname)
     seq_dict = {'seq': seq, 'part_entr': part_entr, 'self_info': self_info}
 
+    if verbose > 1:
+        print('Computing mutual information')
     a3m_ali = load_a3m(fname)
     mi_dict = compute_mi_scores(a3m_ali)
 
+    if verbose > 1:
+        print('Running GaussDCA')
     gdca_dict = gaussdca.run(fname)
 
     feat_dict = {}
@@ -76,6 +81,10 @@ def _predict(model, feat_dict, L):
     return dict(cmap=result_lst[2], s_score=result_lst[0], cmap_6=result_lst[1], cmap_10=result_lst[3])
 
 
-def predict(model, alignment):
-    feat_dict, L = _generate_features(alignment)
+def predict(model, alignment, verbose=0):
+    feat_dict, L = _generate_features(alignment, verbose)
+    if verbose:
+        print('Features generated')
+        print('Predicting')
+        
     return _predict(model, feat_dict, L)
