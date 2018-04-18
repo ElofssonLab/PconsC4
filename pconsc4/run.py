@@ -21,11 +21,13 @@ def _pad(x, depth=4):
         return np.pad(x, [(0, divisor - remainder), (0, 0)], "constant")
     # add zero columns and rows after 2D feature
     elif len(x.shape) == 3:
-        return np.pad(x, [(0, divisor - remainder), (0, divisor - remainder), (0, 0)], "constant")
+        return np.pad(x, [(0, divisor - remainder), (0, divisor - remainder),
+                          (0, 0)], "constant")
 
 
 def _generate_features(fname, verbose=0):
-    feat_lst = ['gdca', 'cross_h', 'nmi_corr', 'mi_corr', 'seq', 'part_entr', 'self_info']
+    feat_lst = ['gdca', 'cross_h', 'nmi_corr', 'mi_corr', 'seq', 'part_entr',
+                'self_info']
 
     if not os.path.isfile(fname):
         raise IOError("Alignment file does not exist.")
@@ -75,10 +77,19 @@ def _symmetrize(matrix, L):
     return matrix
 
 
-def _predict(model, feat_dict, L):
+def _predict_contacts(model, feat_dict, L):
     result_lst = [_symmetrize(x, L) for x in model.predict_on_batch(feat_dict)]
 
-    return dict(cmap=result_lst[2], s_score=result_lst[0], cmap_6=result_lst[1], cmap_10=result_lst[3])
+    return dict(cmap=result_lst[2], s_score=result_lst[0], cmap_6=result_lst[1],
+                cmap_10=result_lst[3])
+
+
+def _predict_ss(model, feat_dict):
+    feat_list = [feat_dict[k] for k in ('seq', 'self_info', 'part_entr')]
+    result_lst = model.predict_on_batch(feat_list)
+    names = ('ss3', 'ss6', 'rsa', 'dihedrals')
+
+    return dict(zip(names, result_lst))
 
 
 def predict(model, alignment, verbose=0):
@@ -86,5 +97,26 @@ def predict(model, alignment, verbose=0):
     if verbose:
         print('Features generated')
         print('Predicting')
-        
-    return _predict(model, feat_dict, L)
+
+    return _predict_contacts(model.contact_model, feat_dict, L)
+
+
+def predict_ss(model, alignment, verbose=0):
+    feat_dict, L = _generate_features(alignment, verbose)
+    if verbose:
+        print('Features generated')
+        print('Predicting')
+
+    return _predict_ss(model.ss_model, feat_dict)
+
+
+def predict_all(model, alignment, verbose=0):
+    feat_dict, L = _generate_features(alignment, verbose)
+    if verbose:
+        print('Features generated')
+        print('Predicting')
+
+    results = dict()
+    results['contacts'] = _predict_contacts(model.contact_model, feat_dict, L)
+    results['ss'] = _predict_ss(model.ss_model, feat_dict)
+    return results
