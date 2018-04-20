@@ -1,5 +1,6 @@
 from __future__ import division
 import os
+from collections import namedtuple
 
 import keras
 import keras.backend as K
@@ -14,14 +15,18 @@ ACTIVATION = ELU
 INIT = "he_normal"
 REG = None
 
+PconsC4 = namedtuple('PconsC4', ['contact_model', 'ss_model'])
+
 
 def self_outer(x):
     outer_x = x[:, :, None, :] * x[:, None, :, :]
     return outer_x
 
 
-def add_1D_conv(model, filters, kernel_size, padding="same", kernel_initializer=INIT, kernel_regularizer=REG):
-    model = Conv1D(filters, kernel_size, padding=padding, kernel_initializer=kernel_initializer,
+def add_1D_conv(model, filters, kernel_size, padding="same",
+                kernel_initializer=INIT, kernel_regularizer=REG):
+    model = Conv1D(filters, kernel_size, padding=padding,
+                   kernel_initializer=kernel_initializer,
                    kernel_regularizer=kernel_regularizer)(model)
     model = ACTIVATION()(model)
     model = BatchNormalization()(model)
@@ -29,16 +34,20 @@ def add_1D_conv(model, filters, kernel_size, padding="same", kernel_initializer=
     return model
 
 
-def add_2D_conv(model, filters, kernel_size, data_format="channels_last", padding="same", depthwise_initializer=INIT,
+def add_2D_conv(model, filters, kernel_size, data_format="channels_last",
+                padding="same", depthwise_initializer=INIT,
                 depthwise_regularizer=REG, dropout=True):
-    model = Conv2D(filters, kernel_size, data_format=data_format, padding=padding,
-                   kernel_initializer=depthwise_initializer, kernel_regularizer=depthwise_regularizer)(model)
+    model = Conv2D(filters, kernel_size, data_format=data_format,
+                   padding=padding,
+                   kernel_initializer=depthwise_initializer,
+                   kernel_regularizer=depthwise_regularizer)(model)
 
     model = ACTIVATION()(model)
     model = BatchNormalization()(model)
     if dropout:
         model = Dropout(DROPOUT)(model)
     return model
+
 
 
 def _add_binary_head(model, dist_cutoff, kernel_size):
@@ -49,34 +58,43 @@ def _add_binary_head(model, dist_cutoff, kernel_size):
 
 def _wrap_model(model, binary_cutoffs):
     # inputs for sequence features
-    inputs_seq = [Input(shape=(None, 22), dtype=K.floatx(), name="seq"),  # sequence
-                  Input(shape=(None, 23), dtype=K.floatx(), name="self_info"),  # self-information
-                  Input(shape=(None, 23), dtype=K.floatx(), name="part_entr")]  # partial entropy
+    inputs_seq = [Input(shape=(None, 22), dtype=K.floatx(), name="seq"),
+                  # sequence
+                  Input(shape=(None, 23), dtype=K.floatx(), name="self_info"),
+                  # self-information
+                  Input(shape=(None, 23), dtype=K.floatx(),
+                        name="part_entr")]  # partial entropy
 
-    ss_model = create_ss_model()
-    bottleneck = ss_model(inputs_seq)
+    bottleneck_model, ss_model = create_ss_model()
+    bottleneck = bottleneck_model(inputs_seq)
 
     # input for 2D features
-    inputs_2D = [Input(shape=(None, None, 1), name="gdca", dtype=K.floatx()),  # gdca
-                 Input(shape=(None, None, 1), name="mi_corr", dtype=K.floatx()),  # mi_corr
-                 Input(shape=(None, None, 1), name="nmi_corr", dtype=K.floatx()),  # nmi_corr
-                 Input(shape=(None, None, 1), name="cross_h", dtype=K.floatx())]  # cross_h
+    inputs_2D = [Input(shape=(None, None, 1), name="gdca", dtype=K.floatx()),
+                 # gdca
+                 Input(shape=(None, None, 1), name="mi_corr", dtype=K.floatx()),
+                 # mi_corr
+                 Input(shape=(None, None, 1), name="nmi_corr",
+                       dtype=K.floatx()),  # nmi_corr
+                 Input(shape=(None, None, 1), name="cross_h",
+                       dtype=K.floatx())]  # cross_h
 
     # input for masking missing residues
     input_mask = Input(shape=(None, None, 1), name="mask")
 
     out_lst = model(inputs_2D + [bottleneck])
     out_mask_lst = []
-    out_names = ["out_sscore_mask"] + ["out_binary_%s_mask" % d for d in binary_cutoffs]
+    out_names = ["out_sscore_mask"] + ["out_binary_%s_mask" % d for d in
+                                       binary_cutoffs]
 
     for i, out in enumerate(out_lst):
         out = keras.layers.Multiply(name=out_names[i])([out, input_mask])
         out_mask_lst.append(out)
 
-    wrapped_model = Model(inputs=inputs_2D + inputs_seq + [input_mask], outputs=out_mask_lst)
+    wrapped_model = Model(inputs=inputs_2D + inputs_seq + [input_mask],
+                          outputs=out_mask_lst)
     wrapped_model.trainable = False
 
-    return wrapped_model
+    return wrapped_model, ss_model
 
 
 def create_ss_model():
@@ -90,7 +108,8 @@ def create_ss_model():
     ss_model = load_model(os.path.join(base_path, model_path))
 
     inputs_seq_ = [Input(shape=(None, 22), dtype=K.floatx()),  # sequence
-                   Input(shape=(None, 23), dtype=K.floatx()),  # self-information
+                   Input(shape=(None, 23), dtype=K.floatx()),
+                   # self-information
                    Input(shape=(None, 23), dtype=K.floatx())]  # partial entropy
 
     seq_feature_model = ss_model.layers_by_depth[5][0]
@@ -99,7 +118,7 @@ def create_ss_model():
 
     bottleneck_seq = seq_feature_model(inputs_seq_)
     bottleneck_model = Model(inputs=inputs_seq_, outputs=bottleneck_seq)
-    return bottleneck_model
+    return bottleneck_model, ss_model
 
 
 def create_unet(filters=64, binary_cutoffs=()):
@@ -166,10 +185,13 @@ def create_unet(filters=64, binary_cutoffs=()):
     unet = add_2D_conv(split, filters, 3)
     unet = add_2D_conv(unet, filters, 3)
 
-    out_sscore = Conv2D(1, 7, activation="sigmoid", data_format="channels_last", padding="same",
-                        kernel_initializer=INIT, kernel_regularizer=REG, name="out_sscore")(unet)
+    out_sscore = Conv2D(1, 7, activation="sigmoid", data_format="channels_last",
+                        padding="same",
+                        kernel_initializer=INIT, kernel_regularizer=REG,
+                        name="out_sscore")(unet)
 
-    model = Model(inputs=inputs_2D + [bottleneck_seq], outputs=[out_sscore] + out_binary_lst)
+    model = Model(inputs=inputs_2D + [bottleneck_seq],
+                  outputs=[out_sscore] + out_binary_lst)
     model.trainable = False
     return model
 
@@ -197,11 +219,11 @@ def get_pconsc4(version=0):
 
     unet.load_weights(os.path.join(base_path, model_path), by_name=True)
 
-    model = _wrap_model(unet, binary_cutoffs)
+    contact_model, ss_model = _wrap_model(unet, binary_cutoffs)
 
-    return model
+    return PconsC4(contact_model=contact_model, ss_model=ss_model)
 
 
 if __name__ == '__main__':
     m = get_pconsc4()
-    m.summary()
+    m.contact_model.summary()
