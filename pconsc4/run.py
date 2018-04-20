@@ -81,7 +81,7 @@ def _predict_contacts(model, feat_dict, L):
     result_lst = [_symmetrize(x, L) for x in model.predict_on_batch(feat_dict)]
 
     return dict(cmap=result_lst[2], s_score=result_lst[0], cmap_6=result_lst[1],
-                cmap_10=result_lst[3])
+                cmap_10=result_lst[3], features=feat_dict)
 
 
 def _predict_ss(model, feat_dict):
@@ -89,10 +89,14 @@ def _predict_ss(model, feat_dict):
     result_lst = model.predict_on_batch(feat_list)
     names = ('ss3', 'ss6', 'rsa', 'dihedrals')
 
-    return dict(zip(names, result_lst))
+    return dict(zip(names, result_lst), features=feat_dict)
 
 
 def predict(model, alignment, verbose=0):
+    return predict_contacts(model, alignment, verbose)
+
+
+def predict_contacts(model, alignment, verbose=0):
     feat_dict, L = _generate_features(alignment, verbose)
     if verbose:
         print('Features generated')
