@@ -41,13 +41,13 @@ def add_2D_conv(model, filters, kernel_size, data_format="channels_last", paddin
     return model
 
 
-def add_binary_head(model, dist_cutoff, kernel_size):
+def _add_binary_head(model, dist_cutoff, kernel_size):
     out_binary = Conv2D(1, kernel_size, activation="sigmoid", data_format="channels_last", padding="same",
                         kernel_initializer=INIT, kernel_regularizer=REG, name="out_binary_%s" % dist_cutoff)(model)
     return out_binary
 
 
-def wrap_model(model, binary_cutoffs):
+def _wrap_model(model, binary_cutoffs):
     # inputs for sequence features
     inputs_seq = [Input(shape=(None, 22), dtype=K.floatx(), name="seq"),  # sequence
                   Input(shape=(None, 23), dtype=K.floatx(), name="self_info"),  # self-information
@@ -161,7 +161,7 @@ def create_unet(filters=64, binary_cutoffs=()):
     out_binary_lst = []
     if binary_cutoffs:
         for d in binary_cutoffs:
-            out_binary_lst.append(add_binary_head(unet, d, 7))
+            out_binary_lst.append(_add_binary_head(unet, d, 7))
 
     unet = add_2D_conv(split, filters, 3)
     unet = add_2D_conv(unet, filters, 3)
@@ -174,16 +174,30 @@ def create_unet(filters=64, binary_cutoffs=()):
     return model
 
 
-def get_pconsc4():
+def get_pconsc4(version=0):
+    """Get the PconsC4 architecture.
+
+    Version:
+        0: first model
+        -1: latest
+    """
     base_path = os.path.dirname(os.path.abspath(__file__))
 
     binary_cutoffs = [6, 8, 10]
     unet = create_unet(binary_cutoffs=binary_cutoffs)
-    model_path = 'models/submodel_weights.h5'
+
+    # Pick the right model
+    if version == -1:
+        version = 0
+
+    if version == 0:
+        model_path = 'models/submodel_v0_weights.h5'
+    else:
+        raise(ValueError('Unkown version number {}'.format(version)))
 
     unet.load_weights(os.path.join(base_path, model_path), by_name=True)
 
-    model = wrap_model(unet, binary_cutoffs)
+    model = _wrap_model(unet, binary_cutoffs)
 
     return model
 

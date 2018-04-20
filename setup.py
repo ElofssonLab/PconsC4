@@ -56,7 +56,7 @@ setup(
     include_dirs=[np.get_include()],
     package_data={
         'pconsc4.models': [
-            'pconsc4/models/submodel_weights.h5',
+            'pconsc4/models/submodel_v0_weights.h5',
             'pconsc4/models/ss_pred_resnet_elu_nolr_dropout01_l26_large_v3_saved_model.h5'
         ]
     },
