@@ -36,6 +36,7 @@ def _generate_features(fname, verbose=0):
         print('Extracting column statistics')
     self_info, part_entr, seq = process_a3m(fname)
     seq_dict = {'seq': seq, 'part_entr': part_entr, 'self_info': self_info}
+    original_length = seq.shape[-2]
 
     if verbose > 1:
         print('Computing mutual information')
@@ -67,7 +68,7 @@ def _generate_features(fname, verbose=0):
     mask = _pad(mask)
     feat_dict['mask'] = mask[None, ...]  # reshape from (L,L,1) to (1,L,L,1)
 
-    return feat_dict, L
+    return feat_dict, original_length
 
 
 def _symmetrize(matrix, L):
@@ -84,9 +85,9 @@ def _predict_contacts(model, feat_dict, L):
                 cmap_10=result_lst[3], features=feat_dict)
 
 
-def _predict_ss(model, feat_dict):
+def _predict_ss(model, feat_dict, L):
     feat_list = [feat_dict[k] for k in ('seq', 'self_info', 'part_entr')]
-    result_lst = model.predict_on_batch(feat_list)
+    result_lst = [x[:, :L, :] for x in model.predict_on_batch(feat_list)]
     names = ('ss3', 'ss6', 'rsa', 'dihedrals')
 
     return dict(zip(names, result_lst), features=feat_dict)
@@ -111,7 +112,7 @@ def predict_ss(model, alignment, verbose=0):
         print('Features generated')
         print('Predicting')
 
-    return _predict_ss(model.ss_model, feat_dict)
+    return _predict_ss(model.ss_model, feat_dict, L)
 
 
 def predict_all(model, alignment, verbose=0):
@@ -120,7 +121,7 @@ def predict_all(model, alignment, verbose=0):
         print('Features generated')
         print('Predicting')
 
-    results = dict()
+    results = dict(features=feat_dict)
     results['contacts'] = _predict_contacts(model.contact_model, feat_dict, L)
-    results['ss'] = _predict_ss(model.ss_model, feat_dict)
+    results['ss'] = _predict_ss(model.ss_model, feat_dict, L)
     return results

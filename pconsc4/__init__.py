@@ -1,3 +1,3 @@
 from .create_model import get_pconsc4
-from .run import predict
+from .run import predict, predict_all, predict_ss
 from . import utils
