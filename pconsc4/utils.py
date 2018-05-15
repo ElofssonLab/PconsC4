@@ -42,10 +42,15 @@ def format_contacts_casp(scores, sequence, properties=None, min_sep=0, full_prec
     else:
         line = '{i} {j} 0 8 {score:.8f}\n'
 
+    data = []
     for i in range(len(sequence) - 1):
         for j in range(i + 1, len(sequence)):
             if abs(i -j) > min_sep:
-                content.append(line.format(i=i + 1, j=j + 1, score=scores[i, j]))
+                data.append((i, j, scores[i, j]))
+
+    data.sort(key=lambda x: x[2], reverse=True)
+    for i, j, sc in data:
+        content.append(line.format(i=i + 1, j=j + 1, score=sc))
 
     content.append('END\n')
     return ''.join(content)
