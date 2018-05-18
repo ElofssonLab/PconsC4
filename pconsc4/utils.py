@@ -36,7 +36,7 @@ def format_contacts_casp(scores, sequence, properties=None, min_sep=0, full_prec
         default_properties.pop(k)
 
     content = [header]
-    for key, value in default_properties:
+    for key, value in default_properties.items():
         content.append('REMARK {} {}\n'.format(key, value))
     content.append("MODEL 1\n")
 
