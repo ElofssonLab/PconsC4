@@ -1,12 +1,12 @@
 # PconsC4:
-fast, accurate, and hassle-free contact prediction.
+Fast, accurate, and hassle-free contact prediction.
 
 ## Installation instructions:
 
-    pip3 install numpy Cython &&
-    pip3 install -U git+https://github.com/serge-sans-paille/pythran@master &&
-    pip3 install -U git+https://github.com/ElofssonLab/pyGaussDCA.git@master &&
-    pip3 install .
+Download the tarball
+
+    pip3 install numpy Cython pythran &&
+    pip3 install pconsc4-0.2.tar.gz
 
 You will also need a deep learning backend compatible with Keras. We recommend Tensorflow:
 
@@ -23,4 +23,18 @@ Inside Python:
 
     pred_1 = pconsc4.predict(model, 'path/to/alignment1')
     pred_2 = pconsc4.predict(model, 'path/to/alignment2')
+    
+    # Show pred_1 on the screen:
+    
+    import matplotlib.pyplot as plt 
+    plt.imshow(pred_1['contacts']['cmap'])
+    plt.show()
 
+
+The program accepts alignments in .fasta, .a3m, or .aln, without line wrapping.
+
+We also provide a function to format the output in CASP format: 
+
+    # Save in CASP format:
+    from pconsc4.utils import format_contacts_casp
+    print(format_contacts_casp(pred_2['contacts']['cmap'], seq_2, min_sep=5))
