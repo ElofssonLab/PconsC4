@@ -112,7 +112,10 @@ def create_ss_model():
                    # self-information
                    Input(shape=(None, 23), dtype=K.floatx())]  # partial entropy
 
-    seq_feature_model = ss_model.layers_by_depth[5][0]
+    try:
+        seq_feature_model = ss_model.layers_by_depth[5][0]
+    except:
+        seq_feature_model = ss_model._layers_by_depth[5][0]
     assert 'model' in seq_feature_model.name, seq_feature_model.name
     seq_feature_model.name = 'sequence_features'
 

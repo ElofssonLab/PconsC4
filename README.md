@@ -27,7 +27,7 @@ Inside Python:
     # Show pred_1 on the screen:
     
     import matplotlib.pyplot as plt 
-    plt.imshow(pred_1['contacts']['cmap'])
+    plt.imshow(pred_1['cmap'])
     plt.show()
 
 
@@ -37,4 +37,4 @@ We also provide a function to format the output in CASP format:
 
     # Save in CASP format:
     from pconsc4.utils import format_contacts_casp
-    print(format_contacts_casp(pred_2['contacts']['cmap'], seq_2, min_sep=5))
+    print(format_contacts_casp(pred_2['cmap'], seq_2, min_sep=5))
