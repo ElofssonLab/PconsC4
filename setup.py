@@ -46,7 +46,7 @@ else:
 
 setup(
     name='pconsc4',
-    version='0.2',
+    version='0.2.1',
     description='',
     url='https://github.com/ElofssonLab/PconsC4',
     author='Mirco Michel and David Menéndez Hurtado',
