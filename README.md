@@ -41,3 +41,7 @@ We also provide a function to format the output in CASP format:
     # Save in CASP format:
     from pconsc4.utils import format_contacts_casp
     print(format_contacts_casp(pred_2['cmap'], seq_2, min_sep=5))
+
+## Troubleshooting:
+
+If pyGaussDCA fails to install with template errors, upgrade your compiler. GCC 5 and higher is known to work.
