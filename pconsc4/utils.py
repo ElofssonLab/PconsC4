@@ -66,3 +66,32 @@ def format_contacts_casp(scores, sequence, properties=None, min_sep=0, full_prec
 def format_ss3(ss3_pred):
     codes = {0: 'H', 1: 'E', 2: 'C'}
     return ''.join(codes[x] for x in ss3_pred.squeeze().argmax(axis=1))
+
+
+def format_contacts_cameo(scores, sequence, seqidx, filename_out, min_sep=0):
+    scores = scores.squeeze()
+
+    # Read sequence
+    seq = ''.join(line.strip() for line in open(sequence) if not line.startswith('>'))
+
+    # Convert sequence to list with numbered residues
+    residues = [char + str(i + 1) for i, char in enumerate(seq)]
+
+    data = []
+    for i in range(len(seq)):
+        for j in range(i + 1, len(seq)):
+            if abs(i - j) > min_sep:
+                data.append((i, j, scores[i, j]))
+
+    # Sort list, starting with the largest probability
+    data.sort(key=lambda x: x[2], reverse=True)
+
+    # Write lines
+    with open(filename_out, 'w') as f_out:
+        for i in range(len(data)):
+            a = data[i][0]
+            b = data[i][1]
+            prob = data[i][2]
+            current_line = 's{}.{}\ts1.{}\t0\t8\t{:.4f}\n'.format(seqidx, residues[a], residues[b], prob)
+            f_out.write(current_line)
+
