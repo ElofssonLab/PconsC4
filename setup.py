@@ -46,7 +46,7 @@ else:
 
 setup(
     name='pconsc4',
-    version='0.3',
+    version='0.4',
     description='',
     url='https://github.com/ElofssonLab/PconsC4',
     author='Mirco Michel and David Menéndez Hurtado',
@@ -64,6 +64,7 @@ setup(
     ext_modules=cythonize(extensions),
     install_requires=open('requirements.txt').read().splitlines(),
     setup_requires=['numpy', 'Cython'],
+    tests_require=['pytest'],
     classifiers=[
         'Programming Language :: Python',
         'Topic :: Scientific/Engineering :: Bio-Informatics',
