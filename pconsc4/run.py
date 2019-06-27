@@ -68,7 +68,7 @@ def _generate_features(fname, verbose=0):
     mask = _pad(mask)
     feat_dict['mask'] = mask[None, ...]  # reshape from (L,L,1) to (1,L,L,1)
 
-    return feat_dict, original_length
+    return feat_dict, original_length, gdca_dict['eff_seq']
 
 
 def _symmetrize(matrix, L):
@@ -98,25 +98,28 @@ def predict(model, alignment, verbose=0):
 
 
 def predict_contacts(model, alignment, verbose=0):
-    feat_dict, L = _generate_features(alignment, verbose)
+    feat_dict, L, meff = _generate_features(alignment, verbose)
     if verbose:
         print('Features generated')
         print('Predicting')
 
-    return _predict_contacts(model.contact_model, feat_dict, L)
+    results = _predict_contacts(model.contact_model, feat_dict, L)
+    results['eff_seq'] = meff
+    return results
 
 
 def predict_ss(model, alignment, verbose=0):
-    feat_dict, L = _generate_features(alignment, verbose)
+    feat_dict, L, meff = _generate_features(alignment, verbose)
     if verbose:
         print('Features generated')
         print('Predicting')
-
-    return _predict_ss(model.ss_model, feat_dict, L)
+    results = _predict_ss(model.ss_model, feat_dict, L)
+    results['eff_seq'] = meff
+    return results
 
 
 def predict_all(model, alignment, verbose=0):
-    feat_dict, L = _generate_features(alignment, verbose)
+    feat_dict, L, meff = _generate_features(alignment, verbose)
     if verbose:
         print('Features generated')
         print('Predicting')
@@ -124,4 +127,5 @@ def predict_all(model, alignment, verbose=0):
     results = dict(features=feat_dict)
     results['contacts'] = _predict_contacts(model.contact_model, feat_dict, L)
     results['ss'] = _predict_ss(model.ss_model, feat_dict, L)
+    results['eff_seq'] = meff
     return results
