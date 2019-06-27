@@ -14,8 +14,6 @@ You will also need a deep learning backend compatible with Keras. We recommend T
 
     pip3 install -U tensorflow
 
-
-
 ## Usage instructions
 
 Inside Python:
@@ -35,6 +33,7 @@ Inside Python:
 
 
 The program accepts alignments in .fasta, .a3m, or .aln, without line wrapping.
+The query sequence must be the first line, and it cannot contain gaps.
 
 We also provide a function to format the output in CASP format: 
 
@@ -42,6 +41,16 @@ We also provide a function to format the output in CASP format:
     from pconsc4.utils import format_contacts_casp
     print(format_contacts_casp(pred_2['cmap'], seq_2, min_sep=5))
 
+and Cameo:
+
+    # Save in Cameo format:
+    from pconsc4.utils import format_contacts_cameo
+    print(format_contacts_cameo(pred_2['cmap'], seq_2, min_sep=5))
+   
 ## Troubleshooting:
 
-If pyGaussDCA fails to install with template errors, upgrade your compiler. GCC 5 and higher is known to work.
+* #### pyGaussDCA fails with "template errors":
+  Update your compiler. GCC 5 or higher is known to work.
+* #### I get a Segmentation Fault when making predictions
+  Ensure the first sequence in your MSA does not contain gaps.
+  If it does, remove the corresponding columns.
