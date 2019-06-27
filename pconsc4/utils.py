@@ -68,30 +68,32 @@ def format_ss3(ss3_pred):
     return ''.join(codes[x] for x in ss3_pred.squeeze().argmax(axis=1))
 
 
-def format_contacts_cameo(scores, sequence, seqidx, filename_out, min_sep=0):
+def format_contacts_cameo(scores, sequence, sequence_id='A', min_sep=0, full_precision=True):
+    if full_precision:
+        template = 's{}.{}\ts1.{}\t0\t8\t{}\n'
+    else:
+        template = 's{}.{}\ts1.{}\t0\t8\t{:.4f}\n'
+
     scores = scores.squeeze()
 
-    # Read sequence
-    seq = ''.join(line.strip() for line in open(sequence) if not line.startswith('>'))
-
     # Convert sequence to list with numbered residues
-    residues = [char + str(i + 1) for i, char in enumerate(seq)]
+    residues = [char + str(i + 1) for i, char in enumerate(sequence)]
 
     data = []
-    for i in range(len(seq)):
-        for j in range(i + 1, len(seq)):
+    for i in range(len(sequence)):
+        for j in range(i + 1, len(sequence)):
             if abs(i - j) > min_sep:
                 data.append((i, j, scores[i, j]))
 
     # Sort list, starting with the largest probability
     data.sort(key=lambda x: x[2], reverse=True)
 
-    # Write lines
-    with open(filename_out, 'w') as f_out:
-        for i in range(len(data)):
-            a = data[i][0]
-            b = data[i][1]
-            prob = data[i][2]
-            current_line = 's{}.{}\ts1.{}\t0\t8\t{:.4f}\n'.format(seqidx, residues[a], residues[b], prob)
-            f_out.write(current_line)
-
+    lines = []
+    for i in range(len(data)):
+        a = data[i][0]
+        b = data[i][1]
+        prob = data[i][2]
+        current_line = template.format(sequence_id, residues[a], residues[b], prob)
+        lines.append(current_line)
+    lines.append('\n')
+    return '\n'.join(lines)
