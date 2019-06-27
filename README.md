@@ -3,12 +3,11 @@ Fast, accurate, and hassle-free contact prediction.
 
 ## Installation instructions:
 
-Download the tarball from the [releases tab](https://github.com/ElofssonLab/PconsC4/releases)
-
     pip3 install numpy Cython pythran &&
-    pip3 install pconsc4-0.2.tar.gz
+    pip3 install pconsc4
 
-NB: the trained model is a bit over Github's limit, so they cannot be checked in the repo, hence the need for the tarball.
+NB: the trained model is a bit over Github's limit, so they cannot be checked in the repo.
+If you need them, you can grab the trained models from the [releases tab.](https://github.com/ElofssonLab/PconsC4/releases)
 
 You will also need a deep learning backend compatible with Keras. We recommend Tensorflow:
 

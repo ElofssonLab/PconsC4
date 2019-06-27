@@ -2,4 +2,5 @@ include pconsc4/models/ss_pred_resnet_elu_nolr_dropout01_l26_large_v3_saved_mode
 include pconsc4/models/submodel_v0_weights.h5
 global-include *.pyx *.c
 include requirements.txt
+graft tests
 
