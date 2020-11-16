@@ -13,6 +13,17 @@ You will also need a deep learning backend compatible with Keras. We recommend T
 
     pip3 install -U tensorflow
 
+## Versions
+
+These versions are known to work
+
+keras==2.2.4
+2.0< tensorflow >=1.12.
+pythran 0.9.5 
+
+Later versions (such as tensorflow 2) are known to not work.
+
+
 ## Usage instructions
 
 Inside Python:
