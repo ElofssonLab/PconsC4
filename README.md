@@ -20,6 +20,8 @@ These versions are known to work
 keras==2.2.4
 2.0< tensorflow >=1.12.
 pythran 0.9.5 
+beniget==0.2.1
+gast==0.3.3
 
 Later versions (such as tensorflow 2) are known to not work.
 
