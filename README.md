@@ -1,6 +1,17 @@
 # PconsC4:
 Fast, accurate, and hassle-free contact prediction.
 
+## Installation with Docker
+To create a minimal python environment containing pconsc4, run the below command in a directory containing the `Dockerfile` (note, the docker engine must be installed).
+```bash
+docker build -t pconsc4 .
+```
+
+Once created, you can enter a simple shell session using the below command. The installation can be confirmed by running `python3` and importing the `pconsc4` library.
+```bash
+docker run --rm -it pconsc4
+```
+
 ## Installation instructions:
 
     pip3 install numpy Cython pythran &&
