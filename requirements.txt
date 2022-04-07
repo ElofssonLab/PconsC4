@@ -1,6 +1,8 @@
-numpy
+h5py==2.10.0
+keras==2.2.4
+tensorflow >=1.12,<2.0
+pythran==0.9.5
+beniget==0.2.1 
+gast==0.3.3
 Cython
-scipy
-keras
-pyGaussDCA
-h5py
+numpy
