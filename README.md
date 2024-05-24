@@ -3,6 +3,18 @@ Fast, accurate, and hassle-free contact prediction.
 
 ## Installation instructions:
 
+Using conda:
+
+    conda env create -f pconsc4_env.yml
+    conda activate pconsc4_env
+    pip install pconsc4
+    export LD_LIBRARY_PATH="$CONDA_PREFIX/lib/:$LD_LIBRARY_PATH"
+    conda deactivate
+
+
+
+Using pip:
+
     pip3 install numpy Cython pythran &&
     pip3 install pconsc4
 
